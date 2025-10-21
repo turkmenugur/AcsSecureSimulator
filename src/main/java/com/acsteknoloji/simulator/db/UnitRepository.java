@@ -48,4 +48,24 @@ public class UnitRepository {
         }
         return Optional.empty(); // Birim bulunamazsa boş Optional döner
     }
+
+    public List<String> getOtherUnitNames(String currentUnitName){
+        List<String> unitNames = new ArrayList<>();
+        String sql = "SELECT unit_name FROM units WHERE unit_name != ? ORDER BY unit_name ASC";
+
+        try (Connection connection = DriverManager.getConnection(DB_URL);
+            PreparedStatement preparedStatement = connection.prepareStatement(sql)){
+            preparedStatement.setString(1, currentUnitName);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()){
+                unitNames.add(resultSet.getString("unit_name"));
+            }
+
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+
+        return unitNames;
+    }
 }

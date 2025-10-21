@@ -1,10 +1,19 @@
 package com.acsteknoloji.simulator.view;
 
+import com.acsteknoloji.simulator.db.UnitRepository;
+import com.acsteknoloji.simulator.model.Unit;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+
+import java.util.List;
 
 public class MainWindowController {
+
+    private Unit loggedInUnit;
+    private Stage stage;
+    private UnitRepository unitRepository;
 
     @FXML
     private ListView<String> unitListView;
@@ -36,10 +45,26 @@ public class MainWindowController {
     @FXML
     private Label timestampLabel;
 
+    public void initSession(Unit unit, Stage stage){
+        this.loggedInUnit = unit;
+        this.stage = stage;
+        System.out.println("Ana pencere oturumu başlatıldı. Kullanıcı: " + loggedInUnit.getUnitName() + ", Rol: " + loggedInUnit.getRole());
+        updateUIForSession();
+    }
+
     @FXML
     private void initialize(){
-        unitListView.getItems().addAll("Komuta_Merkezi", "Birim_Alfa", "Birim_Bravo", "Drone_7");
+        this.unitRepository = new UnitRepository();
         commandComboBox.getItems().addAll("RAPOR VER, MEVZİYİ KORU, ÜSSE DÖN");
+        System.out.println("MainWindowController FXML yüklendi, oturum bilgisi bekleniyor...");
+    }
+
+    private void updateUIForSession(){
+//        Stage stage = (Stage) unitListView.getScene().getWindow();
+        this.stage.setTitle("ACS Simülatör - Oturum: " + loggedInUnit.getUnitName());
+        unitListView.getItems().clear();
+        List<String> otherUnits = unitRepository.getOtherUnitNames(loggedInUnit.getUnitName());
+        unitListView.getItems().addAll(otherUnits);
     }
 
     @FXML

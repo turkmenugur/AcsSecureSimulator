@@ -3,12 +3,16 @@ package com.acsteknoloji.simulator.view;
 import com.acsteknoloji.simulator.db.UnitRepository;
 import com.acsteknoloji.simulator.model.Unit;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
+import javafx.stage.Stage;
 import org.mindrot.jbcrypt.BCrypt;
 
+import java.io.IOException;
 import java.util.Optional;
 
 public class LoginController {
@@ -54,6 +58,31 @@ public class LoginController {
             if (BCrypt.checkpw(password, unit.getPasswordHash())) {
                 statusLabel.setText("Giriş Başarılı!");
                 System.out.println("Başarılı Giriş: " + unit.getUnitName() + ", Rol: " + unit.getRole());
+
+                try{
+                    Stage currentStage = (Stage) loginButton.getScene().getWindow();
+                    currentStage.close();
+
+                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/acsteknoloji/simulator/view/MainWindow.fxml"));
+                    Scene scene = new Scene(loader.load());
+
+                    // --- DEĞİŞİKLİK BURADA ---
+                    // Ana pencere için Stage'i OLUŞTURUYORUZ
+                    Stage mainWindowStage = new Stage();
+                    mainWindowStage.setScene(scene);
+
+                    // Controller'a HEM BİRİMİ HEM DE YENİ OLUŞTURDUĞUMUZ STAGE'İ gönderiyoruz.
+                    MainWindowController mainWindowController = loader.getController();
+                    mainWindowController.initSession(unit, mainWindowStage);
+
+                    // Ana pencereyi gösteriyoruz
+                    mainWindowStage.show();
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    statusLabel.setText("Ana pencere yüklenirken hata oluştu!");
+                }
+
             } else {
                 statusLabel.setText("Hatalı şifre!");
             }
