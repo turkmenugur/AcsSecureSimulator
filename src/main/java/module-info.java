@@ -7,6 +7,7 @@ module com.acsteknoloji.simulator {
     requires static lombok;
     requires java.sql;
     requires jbcrypt;
+    requires java.desktop;
 
     opens com.acsteknoloji.simulator to javafx.fxml;
     exports com.acsteknoloji.simulator;
