@@ -1,0 +1,51 @@
+package com.acsteknoloji.simulator.db;
+
+import com.acsteknoloji.simulator.model.Unit;
+
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+public class UnitRepository {
+    private static final String DB_URL = "jdbc:sqlite:secure_messaging.db";
+
+    public List<String> getAllUnitNames(){
+        List<String> unitNames = new ArrayList<>();
+        String sql = "SELECT unit_name FROM units ORDER BY unit_name ASC";
+
+        try (Connection conn = DriverManager.getConnection(DB_URL);
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            while (rs.next()) {
+                unitNames.add(rs.getString("unit_name"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return unitNames;
+    }
+
+    public Optional<Unit> findUnitByName(String name) {
+        String sql = "SELECT * FROM units WHERE unit_name = ?";
+        try (Connection conn = DriverManager.getConnection(DB_URL);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, name);
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                Unit unit = new Unit();
+                unit.setId(rs.getInt("id"));
+                unit.setUnitName(rs.getString("unit_name"));
+                unit.setPasswordHash(rs.getString("password_hash"));
+                unit.setRole(rs.getString("role"));
+                return Optional.of(unit);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return Optional.empty(); // Birim bulunamazsa boş Optional döner
+    }
+}
