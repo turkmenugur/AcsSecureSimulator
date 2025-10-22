@@ -1,0 +1,70 @@
+/*Genel mesaj balonu stili*/
+.message-bubble {
+    -fx-padding: 10px;
+    -fx-border-radius: 15px;
+    -fx-background-radius: 15px;
+    -fx-max-width: 350px;
+}
+
+/*Gönderilen mesajlar - mavi*/
+.message-bubble.sent{
+    -fx-background-color: #0078FF;
+    -fx-border-color: #006AE1;
+}
+
+.message-bubble.sent .label {
+    -fx-text-fill: white;
+}
+
+.message-bubble.sent .timestamp-label {
+    -fx-text-fill: #E0E0E0;
+}
+
+/*Alınan mesajlar - gri*/
+.message-bubble.received {
+    -fx-background-color: #E5E5EA;
+    -fx-border-color: #DCDCDC;
+}
+
+.message-bubble.received .label {
+    -fx-text-fill: black;
+}
+
+.message-bubble.received .timestamp-label{
+    -fx-text-fill: #555555;
+}
+
+/*Etiketler*/
+.sender-label {
+    -fx-font-weight: bold;
+    -fx-font-scale: 13px;
+}
+
+.message-label {
+    -fx-font-size: 14px;
+    -fx-padding: 5px 0 0 0;
+}
+
+.timestamp-label {
+    -fx-font-size: 11px;
+    -fx-padding: 3px 0 0 0;
+    -fx-alignment: CENTER_RIGHT;
+    -fx-min-width: 100;
+}
+
+/*Detay panelleri stiller*/
+.details-header-label{
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #555555;
+    -fx-padding: 8px 0 2px 0; //üstte boşluk
+}
+
+.details-content-label {
+    -fx-font-size: 13px;
+    -fx-text-fill: #000000;
+}
+
+.details-content-label, .details-header-label{
+    -fx-alignment: CENTER_LEFT;
+}

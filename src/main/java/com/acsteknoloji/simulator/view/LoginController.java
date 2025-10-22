@@ -13,6 +13,7 @@ import javafx.stage.Stage;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.Optional;
 
 public class LoginController {
@@ -66,12 +67,16 @@ public class LoginController {
                     FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/acsteknoloji/simulator/view/MainWindow.fxml"));
                     Scene scene = new Scene(loader.load());
 
-                    // --- DEĞİŞİKLİK BURADA ---
-                    // Ana pencere için Stage'i OLUŞTURUYORUZ
+                    URL cssUrl = getClass().getResource("/style.css");
+                    if (cssUrl != null){
+                        scene.getStylesheets().add(cssUrl.toExternalForm());
+                    }else {
+                        System.out.println("style.css bulunamadı!");
+                    }
+
                     Stage mainWindowStage = new Stage();
                     mainWindowStage.setScene(scene);
 
-                    // Controller'a HEM BİRİMİ HEM DE YENİ OLUŞTURDUĞUMUZ STAGE'İ gönderiyoruz.
                     MainWindowController mainWindowController = loader.getController();
                     mainWindowController.initSession(unit, mainWindowStage);
 
