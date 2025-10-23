@@ -94,9 +94,23 @@ public class MainWindowController {
         commandComboBox.getItems().addAll("RAPOR VER, MEVZİYİ KORU, ÜSSE DÖN");
         System.out.println("MainWindowController FXML yüklendi, oturum bilgisi bekleniyor...");
 
-        messageListView.getSelectionModel().selectedItemProperty().addListener(
-                (observable, oldValue, newValue) -> updateDetailsPane(newValue)
-        );
+        messageListView.setOnMouseClicked(event -> {
+            Message selectedMessage = messageListView.getSelectionModel().getSelectedItem();
+            if (selectedMessage == null){
+                return;
+            }
+
+            updateDetailsPane(selectedMessage);
+
+            if ("FILE".equals(selectedMessage.getMessageType()) &&
+            !selectedMessage.getSenderUnit().equals(loggedInUnit.getUnitName())){
+                handleFileDownload(selectedMessage);
+            }
+        });
+
+//        messageListView.getSelectionModel().selectedItemProperty().addListener(
+//                (observable, oldValue, newValue) -> updateDetailsPane(newValue)
+//        );
 
         clearDetailsPane();
     }
@@ -326,6 +340,68 @@ public class MainWindowController {
             new Thread(fileProcessTask).start();
         }
 
+    }
+
+    /**
+     * Kullanıcı bir 'FILE' mesajına tıkladığında tetiklenir.
+     * Dosyayı indirme, şifre çözme ve kaydetme sürecini yönetir.
+     * @param message İndirilecek dosya mesajı
+     */
+    private void handleFileDownload(Message message){
+        System.out.println("İndirme talebi alındı: " + message.getOriginalText());
+
+        FileChooser saveChooser = new FileChooser();
+        saveChooser.setTitle("Dosyayı Kaydet");
+
+        saveChooser.setInitialFileName(message.getOriginalText());
+        File targetFile = saveChooser.showOpenDialog(stage);
+
+        if (targetFile == null){
+            System.out.println("Dosya kaydetme işlemi iptal edildi");
+            return;
+        }
+
+        Task<Boolean> downloadTask = new Task<Boolean>() {
+            @Override
+            protected Boolean call() throws Exception {
+                updateMessage("Şifreli  dosya okunuyor...");
+                byte[] encryptedBytes = fileService.readEncryptedFile(message.getFilePath());
+
+                updateMessage("Dosya şifresi çözülüyor...");
+                byte[] decryptedBytes = cryptographyService.decrypt(encryptedBytes);
+
+                updateMessage("Bütünlük kontrolü yapılıyor (Hash)...");
+                String decryptedHash = cryptographyService.hash(decryptedBytes);
+
+                String originalHash = message.getMessageHash();
+
+                if (!decryptedHash.equals(originalHash)){
+                    throw new SecurityException("BÜTÜNLÜK HATASI! Hash değerleri uyuşmuyor. Dosya indirilmedi.");
+                }
+
+                updateMessage("Dosya Kaydediliyor...");
+                fileService.saveDecryptedFile(decryptedBytes, targetFile);
+
+                return true;
+            }
+        };
+
+        downloadTask.setOnSucceeded(event -> {
+            Notifications.create()
+                    .title("İndirme Başarılı")
+                    .text(message.getOriginalText() + " dosyası başarıyla indirildi ve doğrulandı.")
+                    .position(Pos.TOP_RIGHT)
+                    .owner(stage)
+                    .showInformation();
+        });
+
+        downloadTask.setOnFailed(event -> {
+            Throwable ex = downloadTask.getException();
+            ex.printStackTrace();
+            showErrorNotification("İndirme Hatası", "Dosya indirilemedi: " + ex.getMessage());
+        });
+
+        new Thread(downloadTask).start();
     }
 
     /**

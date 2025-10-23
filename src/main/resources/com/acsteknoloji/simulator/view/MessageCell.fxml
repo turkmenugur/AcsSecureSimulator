@@ -6,6 +6,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
+<?import org.kordamp.ikonli.javafx.FontIcon?>
 <HBox fx:id="rootPane" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.acsteknoloji.simulator.view.MessageCellController">
     <children>
         <VBox fx:id="bubble" styleClass="message-bubble">
@@ -15,7 +16,17 @@
                         <Font name="System Bold" size="13.0" />
                     </font>
                 </Label>
-                <Label fx:id="messageLabel" styleClass="message-label" wrapText="true" />
+
+                <HBox fx:id="contentBox" alignment="CENTER_LEFT" spacing="10.0">
+                    <children>
+                        <FontIcon fx:id="fileTypeIcon" iconLiteral="fas-file-alt" iconSize="24" visible="false" />
+
+                        <Label fx:id="messageLabel" styleClass="message-label" wrapText="true" />
+
+                        <FontIcon fx:id="downloadIcon" iconLiteral="fas-download" iconSize="18"
+                                  style="-fx-cursor: hand;" visible="false" managed="false" />
+                    </children>
+                </HBox>
                 <Label fx:id="timestampLabel" styleClass="timestamp-label" />
             </children>
         </VBox>
