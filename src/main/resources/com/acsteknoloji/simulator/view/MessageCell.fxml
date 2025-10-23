@@ -23,8 +23,7 @@
 
                         <Label fx:id="messageLabel" styleClass="message-label" wrapText="true" />
 
-                        <FontIcon fx:id="downloadIcon" iconLiteral="fas-download" iconSize="18"
-                                  style="-fx-cursor: hand;" visible="false" managed="false" />
+                        <FontIcon fx:id="downloadIcon" iconLiteral="fas-save" iconSize="18" style="-fx-cursor: hand;" visible="false" managed="false" />
                     </children>
                 </HBox>
                 <Label fx:id="timestampLabel" styleClass="timestamp-label" />

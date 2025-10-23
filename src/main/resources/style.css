@@ -20,6 +20,10 @@
     -fx-text-fill: #E0E0E0;
 }
 
+.message-bubble.sent .font-icon {
+    -fx-icon-color: white; /* Gönderilen mesajdaki ikonlar (dosya tipi) */
+}
+
 /*Alınan mesajlar - gri*/
 .message-bubble.received {
     -fx-background-color: #E5E5EA;
@@ -32,6 +36,15 @@
 
 .message-bubble.received .timestamp-label{
     -fx-text-fill: #555555;
+}
+
+.message-bubble.received .font-icon {
+    -fx-icon-color: #333333; /* Alınan mesajdaki ikonlar (dosya tipi, indirme) */
+}
+
+/* İndirme ikonuna özel hover efekti */
+.message-bubble.received .font-icon:hover {
+    -fx-icon-color: #0078FF; /* Hover rengi (mavi) */
 }
 
 /*Etiketler*/

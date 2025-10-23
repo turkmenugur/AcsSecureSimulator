@@ -31,12 +31,20 @@ public class MessageCellController {
 
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
 
-    public void setData(Message message, String currentUnitName) {
+    private Message message;
+    private MainWindowController mainWindowController;
+
+    public void setData(Message message, String currentUnitName, MainWindowController mainWindowController) {
+        this.message = message;
+        this.mainWindowController = mainWindowController;
+
         senderLabel.setText(message.getSenderUnit());
         messageLabel.setText(message.getOriginalText());
         timestampLabel.setText(message.getTimestamp().format(TIME_FORMATTER));
 
         boolean isSentByMe = message.getSenderUnit().equals(currentUnitName);
+
+        bubble.getStyleClass().removeAll("sent", "received");
 
         if (isSentByMe) {
             rootPane.setAlignment(Pos.CENTER_RIGHT);
@@ -53,11 +61,21 @@ public class MessageCellController {
             if (!isSentByMe){
                 downloadIcon.setVisible(true);
                 downloadIcon.setManaged(true);
+                downloadIcon.setOnMouseClicked(event -> {
+                    mainWindowController.handleFileDownload(message);
+                    event.consume();
+                });
+
+            } else {
+                downloadIcon.setVisible(false);
+                downloadIcon.setManaged(false);
+                downloadIcon.setOnMouseClicked(null);
             }
         } else {
             fileTypeIcon.setVisible(false);
             downloadIcon.setVisible(false);
             downloadIcon.setManaged(false);
+            downloadIcon.setOnMouseClicked(null);
         }
     }
 

@@ -15,6 +15,7 @@ import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -102,10 +103,10 @@ public class MainWindowController {
 
             updateDetailsPane(selectedMessage);
 
-            if ("FILE".equals(selectedMessage.getMessageType()) &&
-            !selectedMessage.getSenderUnit().equals(loggedInUnit.getUnitName())){
-                handleFileDownload(selectedMessage);
-            }
+//            if ("FILE".equals(selectedMessage.getMessageType()) &&
+//            !selectedMessage.getSenderUnit().equals(loggedInUnit.getUnitName())){
+//                handleFileDownload(selectedMessage);
+//            }
         });
 
 //        messageListView.getSelectionModel().selectedItemProperty().addListener(
@@ -133,7 +134,11 @@ public class MainWindowController {
             String integrityText = message.isIntegrityStatus() ? "Doğrulandı" : "Doğrulanamadı / Bekleniyor";
             detailsIntegrityLabel.setText(integrityText);
 
-            detailsEncryptedTextArea.setText(message.getEncryptedText());
+            if ("FILE".equals(message.getMessageType())) {
+                detailsEncryptedTextArea.setText(message.getFilePath());
+            } else {
+                detailsEncryptedTextArea.setText(message.getEncryptedText());
+            }
             detailsHashTextArea.setText(message.getMessageHash());
         } else {
             clearDetailsPane();
@@ -181,9 +186,7 @@ public class MainWindowController {
                         HBox root = loader.load();
                         MessageCellController controller = loader.getController();
 
-                        // Controller'a mesajı ve KİMİN oturum açtığını söylüyoruz
-                        controller.setData(message, loggedInUnit.getUnitName());
-
+                        controller.setData(message, loggedInUnit.getUnitName(), MainWindowController.this);
                         setGraphic(root);
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -347,19 +350,21 @@ public class MainWindowController {
      * Dosyayı indirme, şifre çözme ve kaydetme sürecini yönetir.
      * @param message İndirilecek dosya mesajı
      */
-    private void handleFileDownload(Message message){
+    void handleFileDownload(Message message){
         System.out.println("İndirme talebi alındı: " + message.getOriginalText());
 
-        FileChooser saveChooser = new FileChooser();
-        saveChooser.setTitle("Dosyayı Kaydet");
+        DirectoryChooser directoryChooser = new DirectoryChooser();
+        directoryChooser.setTitle("Dosyayı Kaydedilecek Klasörü Seçin");
+        File selectedDirectory = directoryChooser.showDialog(stage);
 
-        saveChooser.setInitialFileName(message.getOriginalText());
-        File targetFile = saveChooser.showOpenDialog(stage);
-
-        if (targetFile == null){
-            System.out.println("Dosya kaydetme işlemi iptal edildi");
+        if (selectedDirectory == null) {
+            System.out.println("Dosya kaydetme işlemi iptal edildi.");
             return;
         }
+
+        File targetFile = selectedDirectory.toPath().resolve(message.getOriginalText()).toFile();
+
+        // TODO: Eğer o konumda zaten o isimde bir dosya varsa kullanıcıya sor.
 
         Task<Boolean> downloadTask = new Task<Boolean>() {
             @Override
