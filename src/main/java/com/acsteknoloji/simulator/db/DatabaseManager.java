@@ -3,6 +3,8 @@ package com.acsteknoloji.simulator.db;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DatabaseManager {
     private static final String DB_URL = "jdbc:sqlite:secure_messaging.db";
@@ -26,6 +28,8 @@ public class DatabaseManager {
                     "timestamp TEXT NOT NULL," +
                     "integrity_status BOOLEAN NOT NULL," +
                     "status TEXT NOT NULL" +
+                    "message_type TEXT NOT NULL DEFAULT 'TEXT'," +
+                    "file_path TEXT" +
                     ");";
 
     private static final String CREATE_ACTIVITY_LOGS_TABLE_SQL =
@@ -45,8 +49,34 @@ public class DatabaseManager {
             statement.execute(CREATE_UNITS_TABLE_SQL);
             statement.execute(CREATE_MESSAGES_TABLE_SQL);
             statement.execute(CREATE_ACTIVITY_LOGS_TABLE_SQL);
+
+            checkAndUpgradeMessagesTable(connection);
         }catch (Exception e){
             System.out.println(e.getLocalizedMessage());
+        }
+    }
+
+    /**
+     * 'messages' tablosunun şemasını kontrol eder ve eksikse
+     * 'message_type' ve 'file_path' sütunlarını ekler.
+     */
+    private static void checkAndUpgradeMessagesTable(Connection connection) throws SQLException {
+        List<String> columns = new ArrayList<>();
+        try(ResultSet rs = connection.getMetaData().getColumns(null, null, "message", null)){
+            while (rs.next()){
+                columns.add(rs.getString("COLUMN_NAME").toLowerCase());
+            }
+        }
+
+        try(Statement stmt = connection.createStatement()){
+            if (!columns.contains("message_type")){
+                System.out.println("'messages' tablosu güncelleniyor: 'message_type' sütunu ekleniyor...");
+                stmt.execute("ALTER TABLE messages ADD COLUMN message_type TEXT NOT NULL DEFAULT 'TEXT'");
+            }
+            if (!columns.contains("file_path")){
+                System.out.println("'messages' tablosu güncelleniyor: 'file_path' sütunu ekleniyor...");
+                stmt.execute("ALTER TABLE messages ADD COLUMN file_path TEXT");
+            }
         }
     }
 

@@ -14,7 +14,7 @@ public class MessageRepository {
 
     public boolean saveMessage(Message message) {
         String sql = "INSERT INTO messages(sender_unit, receiver_unit, original_text, encrypted_text, " +
-                "message_hash, timestamp, integrity_status, status) VALUES(?,?,?,?,?,?,?,?)";
+                "message_hash, timestamp, integrity_status, status, message_type, file_path) VALUES(?,?,?,?,?,?,?,?,?,?)";
 
         try (Connection conn = DriverManager.getConnection(DB_URL);
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -27,6 +27,8 @@ public class MessageRepository {
             pstmt.setString(6, message.getTimestamp().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
             pstmt.setBoolean(7, message.isIntegrityStatus());
             pstmt.setString(8, message.getStatus().name());
+            pstmt.setString(9, message.getMessageType());
+            pstmt.setString(10, message.getFilePath());
 
             pstmt.executeUpdate();
             return true;
@@ -95,6 +97,8 @@ public class MessageRepository {
         message.setTimestamp(LocalDateTime.parse(rs.getString("timestamp")));
         message.setIntegrityStatus(rs.getBoolean("integrity_status"));
         message.setStatus(MessageStatus.valueOf(rs.getString("status")));
+        message.setMessageType(rs.getString("message_type")!= null ? rs.getString("message_type") : "TEXT");
+        message.setFilePath(rs.getString("file_path"));
         return message;
     }
 }

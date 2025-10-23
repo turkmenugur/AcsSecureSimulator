@@ -15,4 +15,6 @@ public class Message {
     private LocalDateTime timestamp;
     private boolean integrityStatus;
     private MessageStatus status;
+    private String messageType;
+    private String filePath;
 }
