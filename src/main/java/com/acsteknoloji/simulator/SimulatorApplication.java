@@ -23,7 +23,7 @@ public class SimulatorApplication extends Application {
 
         FXMLLoader fxmlLoader = new FXMLLoader(SimulatorApplication.class.getResource("/com/acsteknoloji/simulator/view/LoginWindow.fxml"));
 
-        Scene scene = new Scene(fxmlLoader.load(), 400, 350);
+        Scene scene = new Scene(fxmlLoader.load(), 500, 400);
         stage.setTitle("ACS Simülatör - Giriş");
         stage.setScene(scene);
         stage.show();

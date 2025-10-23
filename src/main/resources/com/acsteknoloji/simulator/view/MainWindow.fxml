@@ -3,9 +3,11 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import com.acsteknoloji.simulator.model.Message?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+<?import javafx.geometry.Insets?>
 
 <?import javafx.geometry.Insets?>
-<BorderPane prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.acsteknoloji.simulator.view.MainWindowController">
+<BorderPane prefHeight="700.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.acsteknoloji.simulator.view.MainWindowController">
    <left>
       <ListView fx:id="unitListView" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
    </left>
@@ -49,16 +51,30 @@
          <center>
             <ListView fx:id="messageListView" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
          </center>
-         <bottom>
-            <HBox prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
-               <children>
-                  <TextField fx:id="messageTextField" />
-                  <ComboBox fx:id="commandComboBox" prefWidth="150.0" />
-                  <Button fx:id="attachFileButton" mnemonicParsing="false" text="Button" />
-                  <Button fx:id="sendButton" mnemonicParsing="false" onAction="#onSendButtonClick" text="Gönder" />
-               </children>
-            </HBox>
-         </bottom>
+          <bottom>
+              <HBox alignment="CENTER_LEFT" prefHeight="50.0" spacing="8.0" style="-fx-border-color: #CCCCCC; -fx-border-width: 1 0 0 0; -fx-background-color: #F9F9F9;" BorderPane.alignment="CENTER">
+                  <children>
+                      <TextField fx:id="messageTextField" promptText="Mesajınızı yazın..." HBox.hgrow="ALWAYS" />
+
+                      <ComboBox fx:id="commandComboBox" prefWidth="130.0" promptText="Hızlı Komut..." />
+
+                      <Button fx:id="attachFileButton" mnemonicParsing="false" style="-fx-background-color: transparent; -fx-cursor: hand;">
+                          <graphic>
+                              <FontIcon iconLiteral="fas-paperclip" iconSize="18" iconColor="#555555" />
+                          </graphic>
+                      </Button>
+
+                      <Button fx:id="sendButton" defaultButton="true" mnemonicParsing="false" onAction="#onSendButtonClick" text="Gönder" contentDisplay="RIGHT" style="-fx-font-weight: bold; -fx-cursor: hand;">
+                          <graphic>
+                              <FontIcon iconLiteral="fas-paper-plane" iconSize="16" />
+                          </graphic>
+                      </Button>
+                  </children>
+                  <padding>
+                      <Insets bottom="8.0" left="10.0" right="10.0" top="8.0" />
+                  </padding>
+              </HBox>
+          </bottom>
       </BorderPane>
    </center>
 </BorderPane>
