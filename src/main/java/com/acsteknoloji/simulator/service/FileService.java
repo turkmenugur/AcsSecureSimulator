@@ -1,5 +1,6 @@
 package com.acsteknoloji.simulator.service;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -15,7 +16,7 @@ public class FileService {
     private static final String STORAGE_DIR = "encrypted_storage";
     private final Path storagePath;
 
-    public FileService(Path storagePath) {
+    public FileService() {
         this.storagePath = Paths.get(STORAGE_DIR);
         ensureStorageDirectoryExists();
     }
@@ -56,5 +57,25 @@ public class FileService {
      */
     public byte[] readEncryptedFile(String filePath) throws IOException{
         return Files.readAllBytes(Paths.get(filePath));
+    }
+
+    /**
+     * Orijinal dosyayı (örn: 'rapor.pdf') diskten okur ve byte dizisine çevirir.
+     * @param file Kullanıcının seçtiği dosya
+     * @return Dosyanın byte içeriği
+     * @throws IOException Okuma hatası olursa
+     */
+    public byte[] readFileBytes(File file) throws IOException {
+        return Files.readAllBytes(file.toPath());
+    }
+
+    /**
+     * Şifresi çözülmüş byte dizisini, kullanıcının seçtiği hedef dosyaya yazar.
+     * @param decryptedData Şifresi çözülmüş veri
+     * @param targetFile Kullanıcının 'Farklı Kaydet' ile seçtiği dosya
+     * @throws IOException Yazma hatası olursa
+     */
+    public void saveDecryptedFile(byte[] decryptedData, File targetFile) throws IOException {
+        Files.write(targetFile.toPath(), decryptedData);
     }
 }

@@ -23,11 +23,11 @@ public class DatabaseManager {
                     "sender_unit TEXT NOT NULL," +
                     "receiver_unit TEXT NOT NULL," +
                     "original_text TEXT," +
-                    "encrypted_text TEXT NOT NULL," +
+                    "encrypted_text TEXT," +
                     "message_hash TEXT NOT NULL," +
                     "timestamp TEXT NOT NULL," +
                     "integrity_status BOOLEAN NOT NULL," +
-                    "status TEXT NOT NULL" +
+                    "status TEXT NOT NULL," +
                     "message_type TEXT NOT NULL DEFAULT 'TEXT'," +
                     "file_path TEXT" +
                     ");";

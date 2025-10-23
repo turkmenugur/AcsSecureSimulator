@@ -7,16 +7,20 @@ import com.acsteknoloji.simulator.model.MessageStatus;
 import com.acsteknoloji.simulator.model.Unit;
 import com.acsteknoloji.simulator.service.ActivityLogger;
 import com.acsteknoloji.simulator.service.CryptographyService;
+import com.acsteknoloji.simulator.service.FileService;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.controlsfx.control.Notifications;
 
+import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -30,6 +34,7 @@ public class MainWindowController {
     private MessageRepository messageRepository;
     private CryptographyService cryptographyService;
     private ActivityLogger activityLogger;
+    private FileService fileService;
 
     @FXML
     private ListView<String> unitListView;
@@ -84,6 +89,7 @@ public class MainWindowController {
         this.messageRepository = new MessageRepository();
         this.cryptographyService = new CryptographyService();
         this.activityLogger = new ActivityLogger();
+        this.fileService = new FileService();
 
         commandComboBox.getItems().addAll("RAPOR VER, MEVZİYİ KORU, ÜSSE DÖN");
         System.out.println("MainWindowController FXML yüklendi, oturum bilgisi bekleniyor...");
@@ -237,6 +243,89 @@ public class MainWindowController {
             e.printStackTrace();
             showErrorNotification("Kritik Hata", "Mesaj gönderilirken bir hata oluştu.");
         }
+    }
+
+    /**
+     * "Ataş" butonuna tıklandığında tetiklenir.
+     * Kullanıcıya bir dosya seçtirir ve bu dosyayı şifreleyip gönderme işlemini başlatır.
+     */
+    @FXML
+    private void onAttachFileButtonClick(){
+        String receiverUnitName = unitListView.getSelectionModel().getSelectedItem();
+        if (receiverUnitName == null || receiverUnitName.isEmpty()){
+            showErrorNotification("Dosya Gönderimi Hatası", "Lütfen bir alıcı birim seçin.");
+            return;
+        }
+
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Gönderilecek Dosyayı Seçin");
+        File selectedFile = fileChooser.showOpenDialog(stage);
+
+        if (selectedFile != null){
+            System.out.println("Dosya Seçildi: " + selectedFile.getName());
+
+            final String finalReceiver = receiverUnitName;
+
+            Task<Message> fileProcessTask = new Task<Message>() {
+                @Override
+                protected Message call() throws Exception {
+                    updateMessage("Dosya Okunuyor: " + selectedFile.getName());
+                    byte[] originalBytes = fileService.readFileBytes(selectedFile);
+
+                    updateMessage("Dosya hash'leniyor...");
+                    String originalHash = cryptographyService.hash(originalBytes);
+
+                    updateMessage("Dosya şifreleniyor...");
+                    byte[] encryptedBytes = cryptographyService.encrypt(originalBytes);
+
+                    updateMessage("Şifreli dosya diske kaydediliyor...");
+                    String savedFilePath = fileService.saveEncryptedFile(encryptedBytes);
+
+                    updateMessage("Veritabanı mesajı oluşturuluyor...");
+                    Message fileMessage = new Message();
+                    fileMessage.setSenderUnit(loggedInUnit.getUnitName());
+                    fileMessage.setReceiverUnit(finalReceiver);
+                    fileMessage.setOriginalText(selectedFile.getName());
+                    fileMessage.setMessageType("FILE");
+                    fileMessage.setFilePath(savedFilePath);
+                    fileMessage.setEncryptedText(null);
+                    fileMessage.setMessageHash(originalHash);
+                    fileMessage.setTimestamp(LocalDateTime.now());
+                    fileMessage.setStatus(MessageStatus.GONDERILDI);
+                    fileMessage.setIntegrityStatus(true);
+
+                    return fileMessage;
+
+                }
+            };
+
+            fileProcessTask.setOnSucceeded(event -> {
+                Message sentMessage = fileProcessTask.getValue();
+
+                boolean isSaved = messageRepository.saveMessage(sentMessage);
+
+                if (isSaved){
+                    messageListView.getItems().add(sentMessage);
+                    messageListView.scrollTo(messageListView.getItems().size() - 1);
+
+                    String logDetails = String.format("Alıcı: %s, Dosya: '%s'",
+                            sentMessage.getReceiverUnit(), sentMessage.getOriginalText());
+                    activityLogger.log(loggedInUnit.getUnitName(), "FILE_SENT", logDetails);
+                    System.out.println("Dosya mesajı başarıyla gönderildi: " + sentMessage.getOriginalText());
+                }else{
+                    showErrorNotification("Veritabanı Hatası", "Dosya mesajı veritabanına kaydedilemedi.");
+                }
+            });
+
+            fileProcessTask.setOnFailed(event -> {
+                Throwable ex = fileProcessTask.getException();
+                ex.printStackTrace();
+                showErrorNotification("Dosya İşleme Hatası", "Dosya gönderilirken bir hata oluştu: " + ex.getMessage());
+            });
+
+            new Thread(fileProcessTask).start();
+        }
+
     }
 
     /**

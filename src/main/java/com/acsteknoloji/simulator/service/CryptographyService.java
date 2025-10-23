@@ -37,4 +37,39 @@ public class CryptographyService {
         byte[] hashBytes = digest.digest(text.getBytes(StandardCharsets.UTF_8));
         return  Base64.getEncoder().encodeToString(hashBytes);
     }
+
+    /**
+     * Bir byte dizisini (dosya içeriği) AES ile şifreler.
+     * @param plainBytes Orijinal dosyanın byte'ları
+     * @return Şifrelenmiş byte'lar
+     */
+    public byte[] encrypt(byte[] plainBytes) throws Exception {
+        SecretKey key = new SecretKeySpec(SECRET_KEY.getBytes(), ALGORITHM);
+        Cipher cipher = Cipher.getInstance(ALGORITHM);
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+        return cipher.doFinal(plainBytes);
+    }
+
+    /**
+     * Bir byte dizisinin (şifreli dosya içeriği) şifresini çözer.
+     * @param encryptedBytes Şifrelenmiş dosyanın byte'ları
+     * @return Orijinal byte'lar
+     */
+    public byte[] decrypt(byte[] encryptedBytes) throws Exception {
+        SecretKey key = new SecretKeySpec(SECRET_KEY.getBytes(), ALGORITHM);
+        Cipher cipher = Cipher.getInstance(ALGORITHM);
+        cipher.init(Cipher.DECRYPT_MODE, key);
+        return cipher.doFinal(encryptedBytes);
+    }
+
+    /**
+     * Bir byte dizisinin (orijinal dosya içeriği) SHA-256 hash'ini hesaplar.
+     * @param inputBytes Orijinal dosyanın byte'ları
+     * @return Hash'in Base64 kodlanmış String hali
+     */
+    public String hash(byte[] inputBytes) throws Exception {
+        MessageDigest digest = MessageDigest.getInstance(HASH_ALGORITHM);
+        byte[] hashBytes = digest.digest(inputBytes);
+        return Base64.getEncoder().encodeToString(hashBytes);
+    }
 }

@@ -58,7 +58,7 @@
 
                       <ComboBox fx:id="commandComboBox" prefWidth="130.0" promptText="Hızlı Komut..." />
 
-                      <Button fx:id="attachFileButton" mnemonicParsing="false" style="-fx-background-color: transparent; -fx-cursor: hand;">
+                      <Button fx:id="attachFileButton" mnemonicParsing="false" style="-fx-background-color: transparent; -fx-cursor: hand;" onAction="#onAttachFileButtonClick">
                           <graphic>
                               <FontIcon iconLiteral="fas-paperclip" iconSize="18" iconColor="#555555" />
                           </graphic>
