@@ -1,5 +1,6 @@
 package com.acsteknoloji.simulator.view;
 
+import com.acsteknoloji.simulator.db.ActivityLogRepository;
 import com.acsteknoloji.simulator.db.MessageRepository;
 import com.acsteknoloji.simulator.db.UnitRepository;
 import com.acsteknoloji.simulator.model.Message;
@@ -12,17 +13,20 @@ import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.controlsfx.control.Notifications;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -36,6 +40,7 @@ public class MainWindowController {
     private CryptographyService cryptographyService;
     private ActivityLogger activityLogger;
     private FileService fileService;
+    private ActivityLogRepository logRepository;
 
     @FXML
     private ListView<String> unitListView;
@@ -74,6 +79,11 @@ public class MainWindowController {
     private TextArea detailsEncryptedTextArea;
     @FXML
     private TextArea detailsHashTextArea;
+    @FXML
+    private Menu adminMenu;
+    @FXML MenuItem userManagementMenuItem;
+    @FXML MenuItem logViewerMenuItem;
+
 
     public void initSession(Unit unit, Stage stage){
         this.loggedInUnit = unit;
@@ -91,6 +101,12 @@ public class MainWindowController {
         this.cryptographyService = new CryptographyService();
         this.activityLogger = new ActivityLogger();
         this.fileService = new FileService();
+        this.logRepository = new ActivityLogRepository();
+
+
+        if (adminMenu != null){
+            adminMenu.setVisible(false);
+        }
 
         commandComboBox.getItems().addAll("RAPOR VER, MEVZİYİ KORU, ÜSSE DÖN");
         System.out.println("MainWindowController FXML yüklendi, oturum bilgisi bekleniyor...");
@@ -165,6 +181,12 @@ public class MainWindowController {
         unitListView.getItems().clear();
         List<String> otherUnits = unitRepository.getOtherUnitNames(loggedInUnit.getUnitName());
         unitListView.getItems().addAll(otherUnits);
+
+        if ("KOMUTA".equals(loggedInUnit.getRole())){
+            adminMenu.setVisible(true);
+        } else {
+            adminMenu.setVisible(false);
+        }
         //loadMessageHistory();
     }
 
@@ -259,6 +281,82 @@ public class MainWindowController {
         } catch (Exception e) {
             e.printStackTrace();
             showErrorNotification("Kritik Hata", "Mesaj gönderilirken bir hata oluştu.");
+        }
+    }
+
+    /**
+     * "Yönetim -> Birim Yönetimi" menüsüne tıklandığında tetiklenir.
+     * UserManagementWindow.fxml'i yeni bir pencerede açar.
+     */
+    @FXML
+    private void onUserManagementClick(){
+        try{
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/acsteknoloji/simulator/view/UserManagementWindow.fxml"));
+            Scene scene = new Scene(loader.load());
+
+            URL cssUrl = getClass().getResource("/style.css");
+            if (cssUrl != null){
+                scene.getStylesheets().add(cssUrl.toExternalForm());
+            }
+
+            UserManagementController controller = loader.getController();
+            controller.initData(this.unitRepository, this.activityLogger, this.loggedInUnit);
+
+            Stage userManagementStage = new Stage();
+            userManagementStage.setTitle("Birim Yönetim Paneli");
+            userManagementStage.setScene(scene);
+
+            userManagementStage.initModality(Modality.WINDOW_MODAL);
+            userManagementStage.initOwner(this.stage);
+
+            userManagementStage.showAndWait();
+
+            unitListView.getItems().clear();
+            List<String> otherUnits = unitRepository.getOtherUnitNames(loggedInUnit.getUnitName());
+            unitListView.getItems().addAll(otherUnits);
+        } catch (IOException e) {
+            e.printStackTrace();
+            showErrorNotification("Arayüz Hatası", "Birim Yönetimi paneli yüklenemedi: " + e.getMessage());
+        }
+    }
+
+    /**
+     * "Yönetim -> Sistem Loglarını Görüntüle" menüsüne tıklandığında tetiklenir.
+     * LogViewerWindow.fxml'i yeni bir pencerede açar.
+     */
+    @FXML
+    private void onLogViewerClick() {
+        try {
+            // Yeni bir FXML yükleyici oluştur
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/acsteknoloji/simulator/view/LogViewerWindow.fxml"));
+            Scene scene = new Scene(loader.load());
+
+            // (Varsa) CSS dosyasını bu yeni sahneye de ekle
+            URL cssUrl = getClass().getResource("/style.css");
+            if (cssUrl != null) {
+                scene.getStylesheets().add(cssUrl.toExternalForm());
+            }
+
+            // Yeni Controller'a log repository'mizi ve yönetici bilgisini enjekte et
+            LogViewerController controller = loader.getController();
+            controller.initData(this.logRepository, this.loggedInUnit);
+
+            // Yeni bir pencere (Stage) oluştur
+            Stage logViewerStage = new Stage();
+            logViewerStage.setTitle("Sistem Aktivite Logları");
+            logViewerStage.setScene(scene);
+
+            // Bu pencerenin ana pencereyi kilitlemesini sağla (Modality)
+            logViewerStage.initModality(Modality.WINDOW_MODAL);
+            logViewerStage.initOwner(this.stage); // Ana pencereye bağla
+
+            logViewerStage.showAndWait(); // Pencere kapanana kadar bekle
+
+            // (Bu pencere veri değiştirmediği için ana arayüzü yenilemeye gerek yok)
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            showErrorNotification("Arayüz Hatası", "Log Görüntüleyici paneli yüklenemedi: " + e.getMessage());
         }
     }
 

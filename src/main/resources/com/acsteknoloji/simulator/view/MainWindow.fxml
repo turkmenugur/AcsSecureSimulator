@@ -8,7 +8,35 @@
 
 <?import javafx.geometry.Insets?>
 <BorderPane prefHeight="700.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.acsteknoloji.simulator.view.MainWindowController">
-   <left>
+    <top>
+        <VBox BorderPane.alignment="CENTER">
+            <children>
+                <MenuBar>
+                    <menus>
+                        <Menu fx:id="adminMenu" mnemonicParsing="false" text="Yönetim">
+                            <items>
+                                <MenuItem fx:id="userManagementMenuItem"
+                                          mnemonicParsing="false"
+                                          onAction="#onUserManagementClick"
+                                          text="Birim Yönetimi..." />
+
+                                <MenuItem fx:id="logViewerMenuItem"
+                                          mnemonicParsing="false"
+                                          onAction="#onLogViewerClick"
+                                          text="Sistem Loglarını Görüntüle..." />
+                            </items>
+                        </Menu>
+                        <Menu mnemonicParsing="false" text="Yardım">
+                            <items>
+                                <MenuItem mnemonicParsing="false" text="Hakkında" />
+                            </items>
+                        </Menu>
+                    </menus>
+                </MenuBar>
+            </children>
+        </VBox>
+    </top>
+    <left>
       <ListView fx:id="unitListView" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
    </left>
    <right>

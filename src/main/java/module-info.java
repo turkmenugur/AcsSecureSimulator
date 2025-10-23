@@ -8,6 +8,7 @@ module com.acsteknoloji.simulator {
     requires java.sql;
     requires jbcrypt;
     requires java.desktop;
+    requires org.xerial.sqlitejdbc;
 
     opens com.acsteknoloji.simulator to javafx.fxml;
     exports com.acsteknoloji.simulator;
